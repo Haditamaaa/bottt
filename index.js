@@ -52,7 +52,7 @@ function createClient(clientId, minMessages, maxMessages, replyMessage, delay) {
 
   client.on("message", async (message) => {
     try {
-      const groupIds = new Set(["62895424010064@c.us"]);
+      const groupIds = new Set(["120363388373592842@g.us"]);
       const cekGroup = groupIds.has(message.from);
       const cekKunci = ["halo dek"].some((keyword) => message.body.toLowerCase().includes(keyword));
 
