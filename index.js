@@ -20,6 +20,8 @@ function createClient(clientId, minMessages, maxMessages, replyMessage, delay) {
   let randomMessageThreshold = 0;
   let isMessageSent = false;
 
+  let outputCounter = 0; // Variabel untuk menghitung jumlah output yang dicetak
+
   client.on("qr", (qr) => {
     console.log(`QR code for ${clientId} received, scan it with your WhatsApp app:`);
 
@@ -50,20 +52,14 @@ function createClient(clientId, minMessages, maxMessages, replyMessage, delay) {
 
   client.on("message", async (message) => {
     try {
-      // Untuk Grup
-      const groupIds = new Set(["120363388373592842@g.us"]);
+      const groupIds = new Set(["62895424010064@c.us"]);
       const cekGroup = groupIds.has(message.from);
-      // Untuk Pengirim
       const cekKunci = ["halo dek"].some((keyword) => message.body.toLowerCase().includes(keyword));
 
-      // untuk cek id grup
       console.log("Ini adalah ID grup:", message.from);
-      // untuk cek nomor pengirim
       console.log("Ini adalah nomor pengirim:", message.author);
-      // untuk cek pesan
       console.log("Ini adalah pesan:", message.body);
 
-      // detect masuk ke grup
       if (cekKunci && cekGroup && !keywordDetected && !isMessageSent) {
         console.log(`Keyword terdeteksi di ${clientId}.`);
         keywordDetected = true;
@@ -85,6 +81,9 @@ function createClient(clientId, minMessages, maxMessages, replyMessage, delay) {
           setTimeout(async () => {
             await client.sendMessage(message.from, replyMessage);
             console.log(`${clientId} mengirim: "${replyMessage}"`);
+
+            // Mulai looping output setelah pesan dikirim
+            loopOutput();
           }, detik);
         }
       }
@@ -98,28 +97,27 @@ function createClient(clientId, minMessages, maxMessages, replyMessage, delay) {
     }
   });
 
+  function loopOutput() {
+    // Looping output 50 kali setelah pesan terkirim
+    const intervalId = setInterval(() => {
+      if (outputCounter >= 50) {
+        clearInterval(intervalId); // Hentikan looping setelah 50 teks tercetak
+        console.log("Looping output selesai setelah 50 teks.");
+      } else {
+        console.log(`Output ${clientId}: Teks ke-${outputCounter + 1} - Menunggu pesan untuk diproses...`);
+        outputCounter++;
+      }
+    }, 1000); // Output tiap 1 detik
+  }
+
   return client;
 }
 
-// Create two clients
-const client1 = createClient("client1", 1, 2, "halo juga gaes", 1000);
+// Create a client
+const client1 = createClient("client1", 1, 2, "Spam Arrived", 1000);
 
-// Initialize clients
+// Initialize client
 client1.initialize();
-
-let counter = 0;
-const targetTextCount = 50; // Jumlah total teks yang ingin dicetak
-
-const intervalId = setInterval(() => {
-  console.log(`Client1: Menunggu pesan untuk diproses...`);
-  counter++;
-
-  // Hentikan interval setelah mencetak 50 teks
-  if (counter >= targetTextCount) {
-    clearInterval(intervalId);
-    console.log(`Sudah mencetak ${targetTextCount} teks.`);
-  }
-}, 5000);
 
 // Express server
 app.use(express.urlencoded({ extended: true })); // To parse URL-encoded form data
